@@ -20,6 +20,7 @@
 #include "exec/helper-proto.h"
 #include "internals.h"
 #include "exec/cpu_ldst.h"
+#include "trace/control.h"
 
 #define SIGNBIT (uint32_t)0x80000000
 #define SIGNBIT64 ((uint64_t)1 << 63)
@@ -762,6 +763,18 @@ void arm_debug_excp_handler(CPUState *cs)
             }
         }
     } else {
+      if (trace_event_get_state(TRACE_MAIN_UBOOT_WRITES) && (env->regs[15] == 0x80100000)){
+	printf("--qemu is inserting watchpoints for main u-boot--\n");
+	trace_event_set_state(TRACE_MY_CPU_WRITE, 1);
+	trace_event_set_state(TRACE_MAIN_UBOOT_WRITES, 0);
+	for (int i = 0; i < (0x40 *0x400); i+=0x400) { // watch all of ram
+	  cpu_watchpoint_insert(cs, 0x40200000 + i, 4, BP_MEM_WRITE , NULL);
+	}
+	for (int i = 0; i < ((512*1024*1024)); i+=0x400) { // watch all of dram
+	  cpu_watchpoint_insert(cs, 0x80000000 + i , 4, BP_MEM_WRITE, NULL);
+	}
+	printf("--qemu is DONE inserting watchpoints for main u-boot--\n");
+      }
         if (check_breakpoints(cpu)) {
             bool same_el = (arm_debug_target_el(env) == arm_current_el(env));
             env->exception.syndrome = syn_breakpoint(same_el);

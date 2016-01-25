@@ -1590,3 +1590,6 @@ i8257_unregistered_dma(int nchan, int dma_pos, int dma_len) "unregistered DMA ch
 cpu_set_state(int cpu_index, uint8_t state) "setting cpu %d state to %" PRIu8
 cpu_halt(int cpu_index) "halting cpu %d"
 cpu_unhalt(int cpu_index) "unhalting cpu %d"
+
+my_cpu_write(unsigned size, uint32_t addr, uint32_t pc, uint32_t lr, uint32_t cpsr) "%d, %x, %x, %x, %x"
+main_uboot_writes(uint32_t addr) "%x"

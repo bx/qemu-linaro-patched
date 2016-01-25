@@ -32,6 +32,7 @@
 #include "hw/arm/soc_dma.h"
 #include "hw/block/flash.h"
 #include "hw/sysbus.h"
+#include "trace/control.h"
 
 //#define OMAP3_DEBUG
 //#define OMAP3_DEBUG_SCM
@@ -4483,5 +4484,17 @@ struct omap_mpu_state_s *omap3_mpu_init(MemoryRegion *sysmem,
     omap3_boot_rom_init(s);
 
     qemu_register_reset(omap3_reset, s);
+
+    if (trace_event_get_state(TRACE_MAIN_UBOOT_WRITES)) {
+      cpu_breakpoint_insert(&(s->cpu->parent_obj), 0x80100000, BP_GDB, NULL);
+    }
+    if (trace_event_get_state(TRACE_MY_CPU_WRITE)) {
+      for (i = 0; i < (0x40 *0x400); i+=0x400) { // watch all of ram
+	cpu_watchpoint_insert(&(s->cpu->parent_obj), 0x40200000 + i, 4, BP_MEM_WRITE , NULL);
+      }
+      for (i = 0; i < ((512*1024*1024)); i+=0x400) { // watch all of dram
+	cpu_watchpoint_insert(&(s->cpu->parent_obj), 0x80000000 + i , 4, BP_MEM_WRITE, NULL);
+      }
+    }
     return s;
 }

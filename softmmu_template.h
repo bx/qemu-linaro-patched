@@ -378,9 +378,9 @@ static inline void glue(io_write, SUFFIX)(CPUArchState *env,
     if (mr != &io_mem_rom && mr != &io_mem_notdirty && !cpu_can_do_io(cpu)) {
         cpu_io_recompile(cpu, retaddr);
     }
-
     cpu->mem_io_vaddr = addr;
     cpu->mem_io_pc = retaddr;
+
     memory_region_dispatch_write(mr, physaddr, val, 1 << SHIFT,
                                  iotlbentry->attrs);
 }

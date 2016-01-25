@@ -95,7 +95,7 @@ static const uint8_t omap3_boot_rom[] = { /* 0x40014000-0x4001bfff */
     0xdc, 0xff, 0x20, 0x40, /* 0x40014038: irq sram vector address */
     0xe0, 0xff, 0x20, 0x40, /* 0x4001403c: fiq sram vector address */
     0xff, 0xff, 0xff, 0xff, /* 0x40014040: boot loader image start address */
-    0xff, 0xff, 0xff, 0xff, /* 0x40014044: booting parameter structure 0-3 */
+    0xf0, 0xef, 0x20, 0x40, /* 0x40014044: booting parameter structure 0-3 */
     0xff, 0xff, 0xff, 0xff, /* 0x40014048: booting parameter structure 4-7 */
     0xff, 0xff, 0xff, 0xff, /* 0x4001404c: booting parameter structure 8-11 */
     0x0e, 0xf0, 0xb0, 0xe1, /* 0x40014050: "movs pc, lr" */
@@ -169,7 +169,7 @@ static const uint8_t omap3_boot_rom[] = { /* 0x40014000-0x4001bfff */
     0x10, 0x0f, 0x0c, 0xee, /* mcr p15, 0, r0, c12, c0, 0 */
     0x60, 0x00, 0x80, 0xe2, /* add r0, r0, #0x60  @ r0 -> monitor vba */
     0x30, 0x0f, 0x0c, 0xee, /* mcr p15, 0, r0, c12, c0, 1 */
-    0x1c, 0x00, 0x40, 0xe2, /* sub r0, r0, #1c    @ r0 -> booting parameter struct */
+    0x1c, 0x00, 0x10, 0xe5, /* sub r0, [r0, #1c]    @ r0 -> booting parameter struct */
     0x01, 0xf0, 0xa0, 0xe1, /* mov pc, r1 */
 };
 
@@ -496,10 +496,9 @@ static int omap3_boot_finish(struct omap3_boot_s *s)
         0, 0, 0, 0 /* device descriptor */
     };
     int result = (s->state == done);
-
     if (result) {
         /* fill in the booting parameter structure */
-        cpu_physical_memory_write_rom(&address_space_memory, 0x40014044, x, 12);
+      cpu_physical_memory_write_rom(&address_space_memory, 0x4020EFF0, x, 12);
     }
     free(s);
     return result;

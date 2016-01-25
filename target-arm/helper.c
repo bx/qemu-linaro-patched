@@ -5735,7 +5735,8 @@ static inline int get_phys_addr(CPUARMState *env, target_ulong address,
                                 hwaddr *phys_ptr, MemTxAttrs *attrs, int *prot,
                                 target_ulong *page_size)
 {
-    if (mmu_idx == ARMMMUIdx_S12NSE0 || mmu_idx == ARMMMUIdx_S12NSE1) {
+
+  if (mmu_idx == ARMMMUIdx_S12NSE0 || mmu_idx == ARMMMUIdx_S12NSE1) {
         /* TODO: when we support EL2 we should here call ourselves recursively
          * to do the stage 1 and then stage 2 translations. The arm_ld*_ptw
          * functions will also need changing to perform ARMMMUIdx_S2NS loads
@@ -5847,7 +5848,6 @@ hwaddr arm_cpu_get_phys_page_debug(CPUState *cs, vaddr addr)
     int prot;
     int ret;
     MemTxAttrs attrs = {};
-
     ret = get_phys_addr(env, addr, 0, cpu_mmu_index(env), &phys_addr,
                         &attrs, &prot, &page_size);
 

@@ -34,6 +34,7 @@
 #include "qemu/envlist.h"
 #include "elf.h"
 
+
 char *exec_path;
 
 int singlestep;
@@ -754,7 +755,7 @@ void cpu_loop(CPUARMState *env)
             break;
         case EXCP_SWI:
         case EXCP_BKPT:
-            {
+            {	      
                 env->eabi = 1;
                 /* system call */
                 if (trapnr == EXCP_BKPT) {
@@ -1049,7 +1050,7 @@ void cpu_loop(CPUARMState *env)
             queue_signal(env, info.si_signo, &info);
             break;
         case EXCP_DEBUG:
-        case EXCP_BKPT:
+        case EXCP_BKPT:	  
             sig = gdb_handlesig(cs, TARGET_SIGTRAP);
             if (sig) {
                 info.si_signo = sig;

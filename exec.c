@@ -56,6 +56,7 @@
 
 #include "qemu/range.h"
 
+#include "trace/control.h"
 //#define DEBUG_SUBPAGE
 
 #if !defined(CONFIG_USER_ONLY)
@@ -1865,7 +1866,7 @@ static void check_watchpoint(int offset, int len, MemTxAttrs attrs, int flags)
     }
     vaddr = (cpu->mem_io_vaddr & TARGET_PAGE_MASK) + offset;
     QTAILQ_FOREACH(wp, &cpu->watchpoints, entry) {
-        if (cpu_watchpoint_address_matches(wp, vaddr, len)
+        if (cpu_watchpoint_address_matches(wp, vaddr - offset, len)
             && (wp->flags & flags)) {
             if (flags == BP_MEM_READ) {
                 wp->flags |= BP_WATCHPOINT_HIT_READ;
@@ -1881,8 +1882,12 @@ static void check_watchpoint(int offset, int len, MemTxAttrs attrs, int flags)
                     cpu->exception_index = EXCP_DEBUG;
                     cpu_loop_exit(cpu);
                 } else {
-                    cpu_get_tb_cpu_state(env, &pc, &cs_base, &cpu_flags);
-                    tb_gen_code(cpu, pc, cs_base, cpu_flags, 1);
+		    if (trace_event_get_state(TRACE_MY_CPU_WRITE)) {		    
+		      trace_my_cpu_write(len,  vaddr, env->regs[15], env->regs[14], cpsr_read(env));
+		  }
+		  cpu_get_tb_cpu_state(env, &pc, &cs_base, &cpu_flags);
+		  tb_gen_code(cpu, pc, cs_base, cpu_flags, 1);
+
                     cpu_resume_from_signal(cpu, NULL);
                 }
             }
@@ -2456,7 +2461,7 @@ static inline void cpu_physical_memory_write_rom_internal(AddressSpace *as,
         l = len;
         mr = address_space_translate(as, addr, &addr1, &l, true);
 
-        if (!(memory_region_is_ram(mr) ||
+	 if (!(memory_region_is_ram(mr) ||
               memory_region_is_romd(mr))) {
             /* do nothing */
         } else {
