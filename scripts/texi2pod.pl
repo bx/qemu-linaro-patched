@@ -316,8 +316,8 @@ while(<$inf>) {
     /^\@item\s+(.*\S)\s*$/ and $endw eq "multitable" and do {
 	@columns = ();
 	for $column (split (/\s*\@tab\s*/, $1)) {
-	    # @strong{...} is used a @headitem work-alike
-	    $column =~ s/^\@strong{(.*)}$/$1/;
+	    # @strong\{...} is used a @headitem work-alike
+	    $column =~ s/^\@strong\{(.*)}$/$1/;
 	    push @columns, $column;
 	}
 	$_ = "\n=item ".join (" : ", @columns)."\n";
